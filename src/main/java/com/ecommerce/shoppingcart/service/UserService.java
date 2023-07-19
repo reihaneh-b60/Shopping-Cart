@@ -2,17 +2,18 @@ package com.ecommerce.shoppingcart.service;
 
 import com.ecommerce.shoppingcart.exception.UserExistException;
 import com.ecommerce.shoppingcart.model.User;
+import com.ecommerce.shoppingcart.Dao.UserBody;
 import com.ecommerce.shoppingcart.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -27,18 +28,38 @@ public class UserService {
         return user1!=null ? user1.getId() : null;
     }
 
-    public User registerUser(User user) throws UserExistException {
-      if (userRepository.findByEmailIgnoreCase(user.getEmail()).isPresent()) {
+    public void registerUser(UserBody userBody) throws UserExistException {
+
+      if (userRepository.findByEmailIgnoreCase(userBody.getEmail()).isPresent()) {
           throw new UserExistException();
       }
-        return userRepository.save(user);
-    }
-
-    public Optional<User> getById(Long id) {
-        return userRepository.findById(id);
+        User user = new User();
+        user.setName(userBody.getName());
+        user.setEmail(userBody.getEmail());
+        if (!userBody.getPassword().isEmpty())
+            user.setPassword(new BCryptPasswordEncoder().encode(userBody.getPassword()));
+        userRepository.save(user);
     }
 
     public List<User> getAllUsers() {
-        return (List<User>) userRepository.findAll();
+        return userRepository.findAll();
     }
+
+    public User findById(Long id) {
+        return userRepository.findById(id).get();
+    }
+
+    public User updateUser(UserBody userBody,Long id) {
+        User user = userRepository.findById(id).get();
+        if (userBody.getName() != null)
+            user.setName(userBody.getName());
+        if (userBody.getEmail()!= null)
+            user.setEmail(userBody.getEmail());
+        if (userBody.getPassword() != null)
+            if (!userBody.getPassword().isEmpty())
+                user.setPassword(new BCryptPasswordEncoder().encode(userBody.getPassword()));
+        return userRepository.save(user);
+
+    }
+
 }

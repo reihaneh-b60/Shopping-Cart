@@ -1,20 +1,22 @@
 package com.ecommerce.shoppingcart.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Email
     private String email;
     private String name;
+
+    private String password;
 
     public User() {
     }

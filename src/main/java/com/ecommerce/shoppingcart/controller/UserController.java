@@ -2,6 +2,7 @@ package com.ecommerce.shoppingcart.controller;
 
 import com.ecommerce.shoppingcart.exception.UserExistException;
 import com.ecommerce.shoppingcart.model.User;
+import com.ecommerce.shoppingcart.Dao.UserBody;
 import com.ecommerce.shoppingcart.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +29,23 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity registerUser(@Valid @RequestBody User user){
+    public ResponseEntity registerUser(@Valid @RequestBody UserBody userBody){
         try {
-             userService.registerUser(user);
+             userService.registerUser(userBody);
              return ResponseEntity.ok().build();
         } catch (UserExistException ex) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
+
+    @GetMapping("/search/{id}")
+    public @ResponseBody User searchUser(@PathVariable(value = "id") Long id) {
+        return userService.findById(id);
+
+    }
+    @PutMapping(value = "/edit/{id}")
+    public User changeUser(@PathVariable(value = "id") Long id,@RequestBody UserBody userBody) {
+        return userService.updateUser(userBody,id);
+    }
+
 }

@@ -2,11 +2,9 @@ package com.ecommerce.shoppingcart.controller;
 
 import com.ecommerce.shoppingcart.Dao.OrderDao;
 import com.ecommerce.shoppingcart.Dao.ResponseOrderDao;
-import com.ecommerce.shoppingcart.model.Product;
 import com.ecommerce.shoppingcart.model.User;
 import com.ecommerce.shoppingcart.model.WebOrder;
 import com.ecommerce.shoppingcart.service.OrderService;
-import com.ecommerce.shoppingcart.service.ProductService;
 import com.ecommerce.shoppingcart.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,29 +12,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Random;
 
 @RestController
 @RequestMapping("/")
 public class ShoppingCartController {
-    private OrderService orderService;
-    private ProductService productService;
-    private UserService userService;
+    private final OrderService orderService;
+    private final UserService userService;
 
-    public ShoppingCartController(OrderService orderService, ProductService productService, UserService userService) {
+    public ShoppingCartController(OrderService orderService, UserService userService) {
         this.orderService = orderService;
-        this.productService = productService;
         this.userService = userService;
     }
 
-    private Logger logger =  LoggerFactory.getLogger(ShoppingCartController.class);
-
-    @GetMapping("/products")
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> productList = productService.getAllProducts();
-        return ResponseEntity.ok(productList);
-    }
+    private final Logger logger =  LoggerFactory.getLogger(ShoppingCartController.class);
 
     @GetMapping("/order/{orderId}")
     public ResponseEntity<WebOrder> getOrder(@PathVariable("orderId") Long orderId) {
@@ -72,6 +61,23 @@ public class ShoppingCartController {
 
         return ResponseEntity.ok(responseOrderDao);
     }
+
+    @GetMapping("/removeOrder/{orderId}/{productId}")
+    public ResponseEntity<WebOrder> removeOrder(@PathVariable("orderId") Long orderId
+            ,@PathVariable("productId") Long poductId) {
+        WebOrder order = orderService.getOrderById(orderId);
+        orderService.removeOrder(order,poductId);
+        return ResponseEntity.ok(order);
+    }
+
+    @GetMapping("/changeItem/{orderId}/{productId}/{quantity}")
+    public ResponseEntity<WebOrder> changeOrder(@PathVariable("orderId") Long orderId
+            ,@PathVariable("productId") Long poductId,@PathVariable("quantity") int newQuantity) {
+        WebOrder order = orderService.getOrderById(orderId);
+        orderService.changeOrder(order,poductId,newQuantity);
+        return ResponseEntity.ok(order);
+    }
+
 
 
 }
