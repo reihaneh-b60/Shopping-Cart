@@ -34,7 +34,6 @@ public class UserService {
     /**
      * Attempts to register a user given the information provided.
      * @param userBody The registration information.
-     * @return The local user that has been written to the database.
      * @throws UserExistException Thrown if there is already a user with the given information.
      */
     public void registerUser(UserBody userBody) throws UserExistException {

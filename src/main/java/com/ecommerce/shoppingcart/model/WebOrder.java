@@ -43,14 +43,4 @@ public class WebOrder {
         this.user = user;
         this.cartItems = cartItems;
     }
-
-    @Override
-    public String toString() {
-        return "WebOrder{" +
-                "id=" + id +
-                ", orderDescription='" + orderDescription + '\'' +
-                ", user=" + user +
-                ", cartItems=" + cartItems +
-                '}';
-    }
 }
