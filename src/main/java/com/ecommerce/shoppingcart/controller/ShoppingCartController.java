@@ -13,13 +13,24 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Random;
-
+/**
+ * Controller to handle requests to create, update and view shopping cart orders .
+ */
 @RestController
 @RequestMapping("/")
 public class ShoppingCartController {
+
+    /** The Order Service. */
     private final OrderService orderService;
+
+    /** The User Service. */
     private final UserService userService;
 
+    /**
+     * Constructor for spring injection.
+     * @param orderService
+     * @param userService
+     */
     public ShoppingCartController(OrderService orderService, UserService userService) {
         this.orderService = orderService;
         this.userService = userService;
@@ -27,12 +38,22 @@ public class ShoppingCartController {
 
     private final Logger logger =  LoggerFactory.getLogger(ShoppingCartController.class);
 
+    /**
+     * Endpoint to get a specific order.
+     * @param orderId The Long provided by spring security context.
+     * @return The details of an order had made.
+     */
     @GetMapping("/order/{orderId}")
     public ResponseEntity<WebOrder> getOrder(@PathVariable("orderId") Long orderId) {
         WebOrder order = orderService.getOrderById(orderId);
         return ResponseEntity.ok(order);
     }
 
+    /**
+     * Endpoint to register new order for specific user.
+     * @param orderDao The order specification provided by spring security context.
+     * @return The details of orders that a user had made.
+     */
     @PostMapping("/registerOrder")
     public ResponseEntity<ResponseOrderDao> registerOrder(@RequestBody OrderDao orderDao) {
         logger.info("Request load"+orderDao.toString());
@@ -62,19 +83,31 @@ public class ShoppingCartController {
         return ResponseEntity.ok(responseOrderDao);
     }
 
+    /**
+     * Endpoint to remove a product from user's order.
+     * @param orderId The Long provided by spring security context.
+     * @param productId The int provided by spring security context specify which product is removed.
+     * @return The details of an order after removing the demand product.
+     */
     @GetMapping("/removeOrder/{orderId}/{productId}")
     public ResponseEntity<WebOrder> removeOrder(@PathVariable("orderId") Long orderId
-            ,@PathVariable("productId") Long poductId) {
+            ,@PathVariable("productId") Long productId) {
         WebOrder order = orderService.getOrderById(orderId);
-        orderService.removeOrder(order,poductId);
+        orderService.removeOrder(order,productId);
         return ResponseEntity.ok(order);
     }
 
+    /**
+     * Endpoint to change the quantity of a demand product from user's order.
+     * @param orderId The Long provided by spring security context.
+     * @param productId The int provided by spring security context specify which product is changed.
+     * @return The details of an order after changing the quantity demand product.
+     */
     @GetMapping("/changeItem/{orderId}/{productId}/{quantity}")
     public ResponseEntity<WebOrder> changeOrder(@PathVariable("orderId") Long orderId
-            ,@PathVariable("productId") Long poductId,@PathVariable("quantity") int newQuantity) {
+            ,@PathVariable("productId") Long productId,@PathVariable("quantity") int newQuantity) {
         WebOrder order = orderService.getOrderById(orderId);
-        orderService.changeOrder(order,poductId,newQuantity);
+        orderService.changeOrder(order,productId,newQuantity);
         return ResponseEntity.ok(order);
     }
 

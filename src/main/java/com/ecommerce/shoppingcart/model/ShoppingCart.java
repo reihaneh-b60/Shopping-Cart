@@ -3,6 +3,9 @@ package com.ecommerce.shoppingcart.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Every Item of an order of shopping cart.
+ */
 @Getter
 @Setter
 @Entity
@@ -10,12 +13,22 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShoppingCart {
+
+    /** Unique id for each item in order. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /** Unique id for product that is ordered. */
     private Long productId;
+
+    /** The name of product that is ordered . */
     private String productName;
+
+    /** The quantity of each item in the order. */
     private Integer quantity;
+
+    /** The amount of each item in the order. */
     private double amount;
 
     public ShoppingCart(Long productId, String productName, Integer quantity, double amount) {

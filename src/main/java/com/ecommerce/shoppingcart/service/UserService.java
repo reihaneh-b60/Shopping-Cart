@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service for handling user actions.
+ */
 @Service
 public class UserService {
 
@@ -28,6 +31,12 @@ public class UserService {
         return user1!=null ? user1.getId() : null;
     }
 
+    /**
+     * Attempts to register a user given the information provided.
+     * @param userBody The registration information.
+     * @return The local user that has been written to the database.
+     * @throws UserExistException Thrown if there is already a user with the given information.
+     */
     public void registerUser(UserBody userBody) throws UserExistException {
 
       if (userRepository.findByEmailIgnoreCase(userBody.getEmail()).isPresent()) {
@@ -41,6 +50,9 @@ public class UserService {
         userRepository.save(user);
     }
 
+    /**
+     * @return The list of users.
+     */
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -49,6 +61,12 @@ public class UserService {
         return userRepository.findById(id).get();
     }
 
+    /**
+     * Update each information of specificated user.
+     * @param userBody The new information that should be replaced
+     * @param id The userId that search for updating
+     * @return The new information of updated user
+     */
     public User updateUser(UserBody userBody,Long id) {
         User user = userRepository.findById(id).get();
         if (userBody.getName() != null)

@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service for handling order actions.
+ */
 @Service
 public class OrderService {
 
@@ -18,16 +21,26 @@ public class OrderService {
 
    private final ProductRepository productRepository;
 
+    /**
+     * Constructor for spring injection.
+     * @param orderRepository
+     * @param productRepository
+     */
     public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
-    }
+   }
 
     public WebOrder getOrderById(Long orderId) {
        Optional<WebOrder> order =orderRepository.findById(orderId);
        return order.isPresent()? order.get() : null;
     }
 
+    /**
+     * Calculate the amount of each item in shopping cart and sum amount's items.
+     * @param shoppingCartList
+     * @return sum of the amount whole items in shopping cart
+     */
     public double getCartamount(List<ShoppingCart> shoppingCartList) {
        double totalCartAmount = 0f;
        double singlecartAmount ;
@@ -56,10 +69,20 @@ public class OrderService {
         return totalCartAmount;
     }
 
+    /**
+     * Save and register the new order.
+     * @param order
+     * @return saved order
+     */
     public WebOrder saveOrder(WebOrder order) {
        return orderRepository.save(order);
     }
 
+    /**
+     * Remove the demand product from the order and refine the quantity of that product in the inventory and amount of the order.
+     * @param webOrder
+     * @param myproductId
+     */
     public void removeOrder(WebOrder webOrder, Long myproductId) {
         List<ShoppingCart> shoppingCartList = webOrder.getCartItems();
         List<ShoppingCart> newlist = new ArrayList<>();
@@ -79,6 +102,12 @@ public class OrderService {
          orderRepository.save(webOrder);
     }
 
+    /**
+     * change the quantity of the demand product from the order and refine the quantity of that product in the inventory and amount of the order.
+     * @param order
+     * @param myproductId
+     * @param newCartQuantity
+     */
     public void changeOrder(WebOrder order, Long myproductId, int newCartQuantity) {
         List<ShoppingCart> shoppingCartList = order.getCartItems();
         int productQuantity = 0;

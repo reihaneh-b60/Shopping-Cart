@@ -9,16 +9,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * Controller to handle the creation, updating & viewing of products.
+ */
 @RestController
 @RequestMapping("/products")
 public class ProductController {
 
-   private final ProductService productService;
+    /** The Product Service. */
+    private final ProductService productService;
 
+    /**
+     * Constructor for spring injection.
+     * @param productService
+     */
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
 
+    /**
+     * Gets the list of products available.
+     * @return The list of products.
+     */
     @GetMapping("")
     public ResponseEntity<List<Product>> getAllProducts() {
         List<Product> productList = productService.getAllProducts();

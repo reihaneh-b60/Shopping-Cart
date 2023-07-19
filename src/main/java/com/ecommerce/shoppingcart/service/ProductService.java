@@ -6,17 +6,28 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service for handling product actions.
+ */
 @Service
 public class ProductService {
 
    private ProductRepository productRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    /**
+     * Constructor for spring injection.
+     * @param productRepository
+     */
+   public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
+   /**
+    * Gets the all products available.
+    * @return The list of products.
+   */
+   public List<Product> getAllProducts() {
+       return productRepository.findAll();
+}
 
 }

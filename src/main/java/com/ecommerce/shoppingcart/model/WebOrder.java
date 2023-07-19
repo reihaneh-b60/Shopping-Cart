@@ -7,22 +7,30 @@ import lombok.ToString;
 
 import java.util.List;
 
+/**
+ * Order generated in shopping cart.
+ */
 @Getter
 @Setter
 @Entity
 @ToString
 @Table(name = "web_order")
 public class WebOrder {
+
+    /** Unique id for the order. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** The description of the order. */
     private String orderDescription;
 
+    /** The user of the order. */
     @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    /** All items of the order. */
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, targetEntity = ShoppingCart.class)
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private List<ShoppingCart> cartItems;
