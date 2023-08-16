@@ -2,7 +2,7 @@ package com.ecommerce.shoppingcart.controller;
 
 import com.ecommerce.shoppingcart.dto.OrderDTO;
 import com.ecommerce.shoppingcart.dto.ResponseOrderDTO;
-import com.ecommerce.shoppingcart.exception.OverDemandQuantity;
+import com.ecommerce.shoppingcart.exception.OverDemandQuantityException;
 import com.ecommerce.shoppingcart.model.Users;
 import com.ecommerce.shoppingcart.model.WebOrder;
 import com.ecommerce.shoppingcart.service.OrderService;
@@ -23,10 +23,8 @@ import java.time.LocalDate;
 @RequestMapping("/")
 public class ShoppingCartController {
 
-    /** The Order Service. */
     private final OrderService orderService;
 
-    /** The User Service. */
     private final UserService userService;
 
     @Autowired
@@ -123,7 +121,7 @@ public class ShoppingCartController {
      */
     @PutMapping("/changeItem/{orderId}/{productId}/{quantity}")
     public ResponseEntity<ResponseOrderDTO> changeOrder(@PathVariable("orderId") Long orderId
-            ,@PathVariable("productId") Long productId,@PathVariable("quantity") int newQuantity) throws OverDemandQuantity {
+            ,@PathVariable("productId") Long productId,@PathVariable("quantity") int newQuantity) throws OverDemandQuantityException {
         WebOrder order = orderService.getOrderById(orderId);
         orderService.changeOrder(order,productId,newQuantity);
         ResponseOrderDTO responseOrderDTO = modelMapper.map(order,ResponseOrderDTO.class);

@@ -27,10 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ShoppingCartControllerTest {
-
-    @Autowired
-    private OrderService orderService;
+class ShoppingCartControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -42,12 +39,21 @@ public class ShoppingCartControllerTest {
 
     protected List<ShoppingCart> shoppingCartList = new ArrayList<>();
     @Test
-    public void getOrderTest() throws Exception {
-        mvc.perform(get("/order/1")).equals(orderService.getOrderById(1L));
+    void getOrderTest() throws Exception {
+        OrderDTO orderDTO = getOrder();
+        WebOrder order = new WebOrder(orderDTO.getOrderDescription(),
+                new Users(orderDTO.getUserEmail(),orderDTO.getUserName()), orderDTO.getCartItems());
+
+        when(shoppingCartController.getOrder(order.getId()))
+                .thenReturn(ResponseEntity.ok().body(modelMapper.map(order, ResponseOrderDTO.class)));
+
+        mvc.perform(get("/order/1").
+                content(asJson(modelMapper.map(order, ResponseOrderDTO.class))).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andReturn();
     }
 
     @Test
-    public void registerOrderTest() throws Exception {
+    void registerOrderTest() throws Exception {
 
         OrderDTO orderDTO = getOrder();
         WebOrder order = new WebOrder(orderDTO.getOrderDescription(),
@@ -61,7 +67,7 @@ public class ShoppingCartControllerTest {
          }
 
     @Test
-    public void removeOrderTest() throws Exception {
+    void removeOrderTest() throws Exception {
 
         OrderDTO orderDTO = getOrder();
         WebOrder order = new WebOrder(orderDTO.getOrderDescription(),new Users(), orderDTO.getCartItems());
@@ -74,7 +80,7 @@ public class ShoppingCartControllerTest {
     }
 
     @Test
-    public void updateOrderTest() throws Exception {
+    void updateOrderTest() throws Exception {
         OrderDTO orderDTO = getOrder();
         WebOrder order = new WebOrder(orderDTO.getOrderDescription(), new Users(), orderDTO.getCartItems());
 

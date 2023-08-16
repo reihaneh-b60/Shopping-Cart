@@ -1,9 +1,9 @@
 package com.ecommerce.shoppingcart.controller;
 
-import com.ecommerce.shoppingcart.dto.UserDTO;
+import com.ecommerce.shoppingcart.dto.ResponseUserDTO;
 import com.ecommerce.shoppingcart.exception.UserExistException;
 import com.ecommerce.shoppingcart.model.Users;
-import com.ecommerce.shoppingcart.dto.UserBody;
+import com.ecommerce.shoppingcart.dto.UserDTO;
 import com.ecommerce.shoppingcart.service.UserService;
 
 import org.modelmapper.ModelMapper;
@@ -40,8 +40,8 @@ public class UserController {
      * @return The list of users.
      */
     @GetMapping("")
-    public List<UserDTO> getAllUsers() {
-        return userService.getAllUsers().stream().map(users -> modelMapper.map(users, UserDTO.class))
+    public List<ResponseUserDTO> getAllUsers() {
+        return userService.getAllUsers().stream().map(users -> modelMapper.map(users, ResponseUserDTO.class))
                 .collect(Collectors.toList());
     }
 
@@ -49,9 +49,9 @@ public class UserController {
      * Register a new user.
      */
     @PostMapping("/register")
-    public void registerUser( @RequestBody UserBody userBody){
+    public void registerUser( @RequestBody UserDTO userDTO){
         try {
-             userService.registerUser(userBody);
+             userService.registerUser(userDTO);
               ResponseEntity.ok().build();
         } catch (UserExistException ex) {
             ResponseEntity.status(HttpStatus.CONFLICT).build();
@@ -64,25 +64,25 @@ public class UserController {
      * @return The specification of found user if exists
      */
     @GetMapping("/search/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable(value = "id") Long id) {
+    public ResponseEntity<ResponseUserDTO> getUserById(@PathVariable(value = "id") Long id) {
         Users users = userService.findById(id);
         if (users != null) {
-            UserDTO userDTO = modelMapper.map(users, UserDTO.class);
-            return ResponseEntity.ok().body(userDTO);
+            ResponseUserDTO responseUserDTO = modelMapper.map(users, ResponseUserDTO.class);
+            return ResponseEntity.ok().body(responseUserDTO);
         } else
             return null;
     }
     /**
      * Edit the user information
      * @param id The Long provided by spring security context.
-     * @param userBody the user information that is changed
+     * @param userDTO the user information that is changed
      * @return The specification the user after changing
      */
     @PutMapping(value = "/edit/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable(value = "id") Long id, @RequestBody UserBody userBody) {
-         Users users = userService.updateUser(userBody,id);
-         UserDTO userDTO = modelMapper.map(users, UserDTO.class);
-         return ResponseEntity.ok().body(userDTO);
+    public ResponseEntity<ResponseUserDTO> updateUser(@PathVariable(value = "id") Long id, @RequestBody UserDTO userDTO) {
+         Users users = userService.updateUser(userDTO,id);
+         ResponseUserDTO responseUserDTO = modelMapper.map(users, ResponseUserDTO.class);
+         return ResponseEntity.ok().body(responseUserDTO);
     }
 
     @DeleteMapping(value = "del/{id}")

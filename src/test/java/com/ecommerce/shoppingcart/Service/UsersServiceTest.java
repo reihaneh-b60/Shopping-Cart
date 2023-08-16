@@ -1,6 +1,6 @@
 package com.ecommerce.shoppingcart.Service;
 
-import com.ecommerce.shoppingcart.dto.UserBody;
+import com.ecommerce.shoppingcart.dto.UserDTO;
 import com.ecommerce.shoppingcart.exception.UserExistException;
 import com.ecommerce.shoppingcart.model.Users;
 import com.ecommerce.shoppingcart.repository.UserRepository;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest
-public class UsersServiceTest {
+class UsersServiceTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -28,7 +28,7 @@ public class UsersServiceTest {
     void getUsersTest() {
         final Users users;
         try {
-            users = userService.registerUser(new UserBody("test1","test1@gmail.com","123"));
+            users = userService.registerUser(new UserDTO("test1","test1@gmail.com","123"));
         } catch (UserExistException e) {
             throw new RuntimeException(e);
         }

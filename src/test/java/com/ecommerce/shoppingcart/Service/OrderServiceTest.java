@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class OrderServiceTest {
+class OrderServiceTest {
 
     @Autowired
     private OrderService orderService;
@@ -31,7 +31,7 @@ public class OrderServiceTest {
 
 
     @Test
-    public void registerOrderTest() throws NoSuchElementException {
+    void registerOrderTest() throws NoSuchElementException {
 
         OrderDTO orderDTO = getOrder();
         Product product1 = productRepository.findById(1L).get();

@@ -16,7 +16,6 @@ import java.util.List;
 @RequestMapping("/products")
 public class ProductController {
 
-    /** The Product Service. */
     private final ProductService productService;
 
     /**
@@ -31,7 +30,7 @@ public class ProductController {
      * Gets the list of products available.
      * @return The list of products.
      */
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<List<Product>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }

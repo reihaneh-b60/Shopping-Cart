@@ -12,13 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ProductTest {
+ class ProductControllerTest {
 
     @Autowired
     private MockMvc mvc;
 
     @Test
-    public void getProductsTest() throws Exception {
+    void getProductsTest() throws Exception {
         mvc.perform(get("/products")).andExpect(status().is(HttpStatus.OK.value()));
     }
 }

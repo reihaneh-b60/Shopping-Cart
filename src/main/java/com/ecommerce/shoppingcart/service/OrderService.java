@@ -1,6 +1,6 @@
 package com.ecommerce.shoppingcart.service;
 
-import com.ecommerce.shoppingcart.exception.OverDemandQuantity;
+import com.ecommerce.shoppingcart.exception.OverDemandQuantityException;
 import com.ecommerce.shoppingcart.model.Product;
 import com.ecommerce.shoppingcart.model.ShoppingCart;
 import com.ecommerce.shoppingcart.model.WebOrder;
@@ -33,7 +33,6 @@ public class OrderService {
    }
 
     public WebOrder getOrderById(Long orderId) {
-//       Optional<WebOrder> order =orderRepository.findById(orderId);
        return orderRepository.findById(orderId).isPresent()? orderRepository.findById(orderId).get() : null;
     }
 
@@ -43,9 +42,9 @@ public class OrderService {
      * @return sum of the amount whole items in shopping cart
      */
     public double getCartamount(List<ShoppingCart> shoppingCartList) {
-       double totalCartAmount = 0f;
-       double singlecartAmount ;
-       int availableQuantity = 0;
+        double totalCartAmount = 0f;
+        double singlecartAmount ;
+        int    availableQuantity = 0;
 
         for (ShoppingCart cart:shoppingCartList) {
             Long productId = cart.getProductId();
@@ -82,25 +81,25 @@ public class OrderService {
     /**
      * Remove the demand product from the order and refine the quantity of that product in the inventory and amount of the order.
      * @param webOrder
-     * @param myproductId
+     * @param myProductId
      */
-    public void removeOrder(WebOrder webOrder, Long myproductId) {
+    public void removeOrder(WebOrder webOrder, Long myProductId) {
         List<ShoppingCart> shoppingCartList = webOrder.getCartItems();
-        List<ShoppingCart> newlist = new ArrayList<>();
+        List<ShoppingCart> newList = new ArrayList<>();
         for (ShoppingCart cart:shoppingCartList) {
             Long productId = cart.getProductId();
-            if (productId.equals(myproductId)) {
+            if (productId.equals(myProductId)) {
                 Product product = productRepository.findById(productId).get();
                 int newQuantity = cart.getQuantity()+product.getQuantity();
                 product.setQuantity(newQuantity);
             }
         }
-            shoppingCartList.stream()
-                .filter(cart -> myproductId.equals(cart.getProductId()))
-                .forEach(newlist::add);
-         shoppingCartList.removeAll(newlist);
+        shoppingCartList.stream()
+            .filter(cart -> myProductId.equals(cart.getProductId()))
+            .forEach(newList::add);
+        shoppingCartList.removeAll(newList);
 
-         orderRepository.save(webOrder);
+        orderRepository.save(webOrder);
     }
 
     /**
@@ -109,7 +108,7 @@ public class OrderService {
      * @param myproductId
      * @param newCartQuantity
      */
-    public void changeOrder(WebOrder order, Long myproductId, int newCartQuantity) throws OverDemandQuantity {
+    public void changeOrder(WebOrder order, Long myproductId, int newCartQuantity) throws OverDemandQuantityException {
         List<ShoppingCart> shoppingCartList = order.getCartItems();
         int productQuantity ;
         boolean flag = false;
@@ -124,11 +123,11 @@ public class OrderService {
                     if ((newCartQuantity - cart.getQuantity()) <= product.getQuantity()) {
                         productQuantity = product.getQuantity() -(newCartQuantity - cart.getQuantity());
                     } else {
-                        throw new OverDemandQuantity("Demanded Quantity is not available");
+                        throw new OverDemandQuantityException("Demanded Quantity is not available");
                     }
                 }
                 cart.setQuantity(newCartQuantity);
-                cart.setAmount(product.getPrice()*newCartQuantity);
+                cart.setAmount(product.getPrice() * newCartQuantity);
                 product.setQuantity(productQuantity);
                 productRepository.save(product);
             }
@@ -141,7 +140,7 @@ public class OrderService {
                 shoppingCartList.add(newSoppingCart);
                 product.setQuantity(product.getQuantity() - newCartQuantity);
             } else {
-                throw new OverDemandQuantity("Demanded Quantity is not available");
+                throw new OverDemandQuantityException("Demanded Quantity is not available");
             }
         }
         orderRepository.save(order);

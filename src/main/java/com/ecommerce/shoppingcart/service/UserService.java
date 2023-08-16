@@ -2,7 +2,7 @@ package com.ecommerce.shoppingcart.service;
 
 import com.ecommerce.shoppingcart.exception.UserExistException;
 import com.ecommerce.shoppingcart.model.Users;
-import com.ecommerce.shoppingcart.dto.UserBody;
+import com.ecommerce.shoppingcart.dto.UserDTO;
 import com.ecommerce.shoppingcart.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,6 +17,7 @@ import java.util.List;
 @Service
 public class UserService {
 
+    final String UserMessage= "That user doesn't exist";
     private final UserRepository userRepository;
 
     @Autowired
@@ -34,19 +35,19 @@ public class UserService {
 
     /**
      * Attempts to register a user given the information provided.
-     * @param userBody The registration information.
+     * @param userDTO The registration information.
      * @throws UserExistException Thrown if there is already a user with the given information.
      */
-    public Users registerUser(UserBody userBody) throws UserExistException {
+    public Users registerUser(UserDTO userDTO) throws UserExistException {
 
-      if (userRepository.findByEmailIgnoreCase(userBody.getEmail()).isPresent()) {
+      if (userRepository.findByEmailIgnoreCase(userDTO.getEmail()).isPresent()) {
           throw new UserExistException();
       }
         Users users = new Users();
-        users.setName(userBody.getName());
-        users.setEmail(userBody.getEmail());
-        if (!userBody.getPassword().isEmpty())
-            users.setPassword(new BCryptPasswordEncoder().encode(userBody.getPassword()));
+        users.setName(userDTO.getName());
+        users.setEmail(userDTO.getEmail());
+        if (!userDTO.getPassword().isEmpty())
+            users.setPassword(new BCryptPasswordEncoder().encode(userDTO.getPassword()));
         return userRepository.save(users);
     }
 
@@ -59,32 +60,32 @@ public class UserService {
 
     public Users findById(Long id) {
         userRepository.findById(id)
-                .orElseThrow(()->new UsernameNotFoundException("That user doesn't exist"));
+                .orElseThrow(()->new UsernameNotFoundException(UserMessage));
 
         return userRepository.findById(id).get();
     }
 
     /**
      * Update each information of specificated user.
-     * @param userBody The new information that should be replaced
+     * @param userDTO The new information that should be replaced
      * @param id The userId that search for updating
      * @return The new information of updated user
      */
-    public Users updateUser(UserBody userBody, Long id) {
+    public Users updateUser(UserDTO userDTO, Long id) {
         Users users = userRepository.findById(id)
-                .orElseThrow(()->new UsernameNotFoundException("That user doesn't exist"));
-        if (userBody.getName() != null)
-            users.setName(userBody.getName());
-        if (userBody.getEmail()!= null)
-            users.setEmail(userBody.getEmail());
-        if (userBody.getPassword() != null && !userBody.getPassword().isEmpty())
-                users.setPassword(new BCryptPasswordEncoder().encode(userBody.getPassword()));
+                .orElseThrow(()->new UsernameNotFoundException(UserMessage));
+        if (userDTO.getName() != null)
+            users.setName(userDTO.getName());
+        if (userDTO.getEmail()!= null)
+            users.setEmail(userDTO.getEmail());
+        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty())
+                users.setPassword(new BCryptPasswordEncoder().encode(userDTO.getPassword()));
         return userRepository.save(users);
     }
 
     public void deleteUserById(Long id) {
         userRepository.findById(id)
-                .orElseThrow(()->new UsernameNotFoundException("That user doesn't exist"));
+                .orElseThrow(()->new UsernameNotFoundException(UserMessage));
         userRepository.deleteById(id);
     }
 }

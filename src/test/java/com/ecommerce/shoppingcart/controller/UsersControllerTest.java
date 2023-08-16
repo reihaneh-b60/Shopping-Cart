@@ -1,7 +1,7 @@
 package com.ecommerce.shoppingcart.controller;
 
-import com.ecommerce.shoppingcart.dto.UserBody;
 import com.ecommerce.shoppingcart.dto.UserDTO;
+import com.ecommerce.shoppingcart.dto.ResponseUserDTO;
 import com.ecommerce.shoppingcart.model.Users;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class UsersControllerTest {
+class UsersControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -50,7 +50,7 @@ public class UsersControllerTest {
         given(userController.getUserById(anyLong())).willReturn(
                 ResponseEntity.ok().
                         body(modelMapper.map((Users.builder().id(1L).email("test1@gmail.com").name("test1").
-                                password("1234").build()), UserDTO.class)));
+                                password("1234").build()), ResponseUserDTO.class)));
         mvc.perform(get("/user/search/1").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("email").value("test1@gmail.com"))
@@ -68,12 +68,12 @@ public class UsersControllerTest {
 
     @Test
     void registerUserTest() throws Exception {
-        UserBody userBody = new UserBody();
-        userBody.setName("test1");
-        userBody.setEmail("test1@gmail.com");
-        userBody.setPassword("1234");
-        doNothing().when(userController).registerUser(userBody);
-        mvc.perform(post("/user/register").content(asJson(userBody)).contentType(MediaType.APPLICATION_JSON))
+        UserDTO userDTO = new UserDTO();
+        userDTO.setName("test1");
+        userDTO.setEmail("test1@gmail.com");
+        userDTO.setPassword("1234");
+        doNothing().when(userController).registerUser(userDTO);
+        mvc.perform(post("/user/register").content(asJson(userDTO)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn();
     }
 
@@ -81,8 +81,8 @@ public class UsersControllerTest {
     void userUpdateTest() throws Exception {
         Users users= getUser();
         when(userController.updateUser(users.getId()
-                ,new UserBody(users.getName(),users.getEmail(),users.getPassword())))
-                .thenReturn(ResponseEntity.ok().body(modelMapper.map(users, UserDTO.class)));
+                ,new UserDTO(users.getName(),users.getEmail(),users.getPassword())))
+                .thenReturn(ResponseEntity.ok().body(modelMapper.map(users, ResponseUserDTO.class)));
         mvc.perform(put("/user/edit/"+users.getId()).content(asJson(users)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn();
 
