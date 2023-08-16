@@ -33,8 +33,7 @@ public class ProductController {
      */
     @GetMapping("")
     public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> productList = productService.getAllProducts();
-        return ResponseEntity.ok(productList);
+        return ResponseEntity.ok(productService.getAllProducts());
     }
 
 }

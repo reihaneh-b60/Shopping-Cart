@@ -26,9 +26,8 @@ public class WebOrder {
     private String orderDescription;
 
     /** The user of the order. */
-    @OneToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private User user;
+    @OneToOne(mappedBy ="webOrder" ,cascade = CascadeType.REMOVE)
+    private Users users;
 
     /** All items of the order. */
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, targetEntity = ShoppingCart.class)
@@ -38,9 +37,9 @@ public class WebOrder {
     public WebOrder() {
     }
 
-    public WebOrder(String orderDescription, User user, List<ShoppingCart> cartItems) {
+    public WebOrder(String orderDescription, Users users, List<ShoppingCart> cartItems) {
         this.orderDescription = orderDescription;
-        this.user = user;
+        this.users = users;
         this.cartItems = cartItems;
     }
 }

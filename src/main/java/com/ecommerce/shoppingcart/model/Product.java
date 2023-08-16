@@ -26,7 +26,7 @@ public class Product {
     private Double price;
 
     /** The available quantity of the product. */
-    private int Quantity;
+    private int quantity;
 
     @Override
     public String toString() {
@@ -35,7 +35,7 @@ public class Product {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", price=" + price +
-                ", Quantity=" + Quantity +
+                ", Quantity=" + quantity +
                 '}';
     }
 }

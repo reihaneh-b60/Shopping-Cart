@@ -2,6 +2,7 @@ package com.ecommerce.shoppingcart.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,8 @@ import lombok.Setter;
 @Setter
 @Entity
 @AllArgsConstructor
-public class User {
+@Builder
+public class Users {
     /** Unique id for the user. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,11 +29,25 @@ public class User {
     /** The encrypted password of the user. */
     private String password;
 
-    public User() {
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private WebOrder webOrder;
+
+    public Users() {
     }
 
-    public User(String email, String name) {
+    public Users(String email, String name) {
         this.email = email;
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                ", password='" + password + '\'' +
+                '}';
     }
 }

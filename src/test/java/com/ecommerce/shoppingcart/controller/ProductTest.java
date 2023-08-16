@@ -19,6 +19,6 @@ public class ProductTest {
 
     @Test
     public void getProductsTest() throws Exception {
-        mvc.perform(get("/product")).andExpect(status().is(HttpStatus.OK.value()));
+        mvc.perform(get("/products")).andExpect(status().is(HttpStatus.OK.value()));
     }
 }

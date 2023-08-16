@@ -1,32 +1,21 @@
-package com.ecommerce.shoppingcart.Dao;
+package com.ecommerce.shoppingcart.dto;
 
 import com.ecommerce.shoppingcart.model.ShoppingCart;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class OrderDao {
+@Data
+public class OrderDTO {
 
     private String orderDescription;
     private List<ShoppingCart> cartItems;
     private String userEmail;
     private String userName;
 
-    public OrderDao(String orderDescription, List<ShoppingCart> cartItems, String userEmail, String userName) {
-        this.orderDescription = orderDescription;
-        this.cartItems = cartItems;
-        this.userEmail = userEmail;
-        this.userName = userName;
-    }
-
     @Override
     public String toString() {
-        return "OrderDao{" +
+        return "OrderDTO{" +
                 "orderDescription='" + orderDescription + '\'' +
                 ", cartItems=" + cartItems +
                 ", userEmail='" + userEmail + '\'' +

@@ -1,18 +1,21 @@
 package com.ecommerce.shoppingcart.controller;
 
-import com.ecommerce.shoppingcart.Dao.OrderDao;
-import com.ecommerce.shoppingcart.Dao.ResponseOrderDao;
-import com.ecommerce.shoppingcart.model.User;
+import com.ecommerce.shoppingcart.dto.OrderDTO;
+import com.ecommerce.shoppingcart.dto.ResponseOrderDTO;
+import com.ecommerce.shoppingcart.exception.OverDemandQuantity;
+import com.ecommerce.shoppingcart.model.Users;
 import com.ecommerce.shoppingcart.model.WebOrder;
 import com.ecommerce.shoppingcart.service.OrderService;
 import com.ecommerce.shoppingcart.service.UserService;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Random;
+
 /**
  * Controller to handle requests to create, update and view shopping cart orders .
  */
@@ -26,6 +29,8 @@ public class ShoppingCartController {
     /** The User Service. */
     private final UserService userService;
 
+    @Autowired
+    private ModelMapper modelMapper;
     /**
      * Constructor for spring injection.
      * @param orderService
@@ -44,43 +49,51 @@ public class ShoppingCartController {
      * @return The details of an order had made.
      */
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<WebOrder> getOrder(@PathVariable("orderId") Long orderId) {
+    public ResponseEntity<ResponseOrderDTO> getOrder(@PathVariable("orderId") Long orderId) {
+
         WebOrder order = orderService.getOrderById(orderId);
-        return ResponseEntity.ok(order);
+        if (order != null) {
+            ResponseOrderDTO responseOrderDTO = modelMapper.map(order, ResponseOrderDTO.class);
+            responseOrderDTO.setAmount(orderService.getOrderAmount(order.getCartItems()));
+            responseOrderDTO.setDate(LocalDate.now());
+
+            return ResponseEntity.ok(responseOrderDTO);
+        } else
+            return null;
     }
 
     /**
      * Endpoint to register new order for specific user.
-     * @param orderDao The order specification provided by spring security context.
+     * @param orderDTO The order specification provided by spring security context.
      * @return The details of orders that a user had made.
      */
     @PostMapping("/registerOrder")
-    public ResponseEntity<ResponseOrderDao> registerOrder(@RequestBody OrderDao orderDao) {
-        logger.info("Request load"+orderDao.toString());
-        ResponseOrderDao responseOrderDao = new ResponseOrderDao();
-        double amount = orderService.getCartamount(orderDao.getCartItems());
+    public ResponseEntity<ResponseOrderDTO> registerOrder(@RequestBody OrderDTO orderDTO) {
+        logger.info("Request load"+ orderDTO.toString());
+        ResponseOrderDTO responseOrderDTO = new ResponseOrderDTO();
+        double amount = orderService.getCartamount(orderDTO.getCartItems());
 
-        User user = new User(orderDao.getUserEmail(),orderDao.getUserName());
-        Long userId = userService.isUserPeresent(user);
+        Users users = new Users(orderDTO.getUserEmail(), orderDTO.getUserName());
+        Long userId = userService.isUserPeresent(users);
 
         if (userId != null) {
-            user.setId(userId);
+            users.setId(userId);
             logger.info("user already present in users list by id"+userId);
         }else {
-            user = userService.saveUser(user);
-            logger.info("user saved in users list with id"+ user.getId());
+            users = userService.saveUser(users);
+            logger.info("user saved in users list with id"+ users.getId());
         }
-        WebOrder order = new WebOrder(orderDao.getOrderDescription(),user,orderDao.getCartItems());
+        WebOrder order = new WebOrder(orderDTO.getOrderDescription(), users, orderDTO.getCartItems());
         order = orderService.saveOrder(order);
         logger.info("order registered successfully");
 
-        responseOrderDao.setAmount(amount);
-        responseOrderDao.setDate(LocalDate.now());
-        responseOrderDao.setInvoiceNumber(new Random().nextInt(500));
-        responseOrderDao.setOrderId(order.getId());
-        responseOrderDao.setOrderDescription(order.getOrderDescription());
+        responseOrderDTO.setAmount(amount);
+        responseOrderDTO.setDate(LocalDate.now());
+        responseOrderDTO.setOrderId(order.getId());
+        responseOrderDTO.setOrderDescription(order.getOrderDescription());
+        responseOrderDTO.setCartItems(orderDTO.getCartItems());
 
-        return ResponseEntity.ok(responseOrderDao);
+        return ResponseEntity.ok(responseOrderDTO);
     }
 
     /**
@@ -90,11 +103,16 @@ public class ShoppingCartController {
      * @return The details of an order after removing the demand product.
      */
     @GetMapping("/removeOrder/{orderId}/{productId}")
-    public ResponseEntity<WebOrder> removeOrder(@PathVariable("orderId") Long orderId
+    public ResponseEntity<ResponseOrderDTO> removeOrder(@PathVariable("orderId") Long orderId
             ,@PathVariable("productId") Long productId) {
         WebOrder order = orderService.getOrderById(orderId);
         orderService.removeOrder(order,productId);
-        return ResponseEntity.ok(order);
+
+        ResponseOrderDTO responseOrderDTO = modelMapper.map(order,ResponseOrderDTO.class);
+        responseOrderDTO.setAmount(orderService.getOrderAmount(order.getCartItems()));
+        responseOrderDTO.setDate(LocalDate.now());
+
+        return ResponseEntity.ok(responseOrderDTO);
     }
 
     /**
@@ -103,12 +121,16 @@ public class ShoppingCartController {
      * @param productId The int provided by spring security context specify which product is changed.
      * @return The details of an order after changing the quantity demand product.
      */
-    @GetMapping("/changeItem/{orderId}/{productId}/{quantity}")
-    public ResponseEntity<WebOrder> changeOrder(@PathVariable("orderId") Long orderId
-            ,@PathVariable("productId") Long productId,@PathVariable("quantity") int newQuantity) {
+    @PutMapping("/changeItem/{orderId}/{productId}/{quantity}")
+    public ResponseEntity<ResponseOrderDTO> changeOrder(@PathVariable("orderId") Long orderId
+            ,@PathVariable("productId") Long productId,@PathVariable("quantity") int newQuantity) throws OverDemandQuantity {
         WebOrder order = orderService.getOrderById(orderId);
         orderService.changeOrder(order,productId,newQuantity);
-        return ResponseEntity.ok(order);
+        ResponseOrderDTO responseOrderDTO = modelMapper.map(order,ResponseOrderDTO.class);
+        responseOrderDTO.setAmount(orderService.getOrderAmount(order.getCartItems()));
+        responseOrderDTO.setDate(LocalDate.now());
+
+        return ResponseEntity.ok(responseOrderDTO);
     }
 
 

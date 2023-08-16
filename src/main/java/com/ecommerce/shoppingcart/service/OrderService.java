@@ -1,5 +1,6 @@
 package com.ecommerce.shoppingcart.service;
 
+import com.ecommerce.shoppingcart.exception.OverDemandQuantity;
 import com.ecommerce.shoppingcart.model.Product;
 import com.ecommerce.shoppingcart.model.ShoppingCart;
 import com.ecommerce.shoppingcart.model.WebOrder;
@@ -32,8 +33,8 @@ public class OrderService {
    }
 
     public WebOrder getOrderById(Long orderId) {
-       Optional<WebOrder> order =orderRepository.findById(orderId);
-       return order.isPresent()? order.get() : null;
+//       Optional<WebOrder> order =orderRepository.findById(orderId);
+       return orderRepository.findById(orderId).isPresent()? orderRepository.findById(orderId).get() : null;
     }
 
     /**
@@ -108,18 +109,22 @@ public class OrderService {
      * @param myproductId
      * @param newCartQuantity
      */
-    public void changeOrder(WebOrder order, Long myproductId, int newCartQuantity) {
+    public void changeOrder(WebOrder order, Long myproductId, int newCartQuantity) throws OverDemandQuantity {
         List<ShoppingCart> shoppingCartList = order.getCartItems();
-        int productQuantity = 0;
+        int productQuantity ;
+        boolean flag = false;
         for (ShoppingCart cart:shoppingCartList) {
             Long productId = cart.getProductId();
             if (productId.equals(myproductId)) {
+                flag = true;
                 Product product = productRepository.findById(productId).get();
                 if (newCartQuantity < cart.getQuantity()) {
                     productQuantity = product.getQuantity()+ (cart.getQuantity()-newCartQuantity);
                 } else {
-                    if (newCartQuantity < product.getQuantity()) {
+                    if ((newCartQuantity - cart.getQuantity()) <= product.getQuantity()) {
                         productQuantity = product.getQuantity() -(newCartQuantity - cart.getQuantity());
+                    } else {
+                        throw new OverDemandQuantity("Demanded Quantity is not available");
                     }
                 }
                 cart.setQuantity(newCartQuantity);
@@ -128,6 +133,25 @@ public class OrderService {
                 productRepository.save(product);
             }
         }
+        if (!flag) {
+            Product product = productRepository.findById(myproductId).get();
+            if (newCartQuantity < product.getQuantity()) {
+                ShoppingCart newSoppingCart = new ShoppingCart(myproductId, product.getName()
+                        , newCartQuantity, product.getPrice() * newCartQuantity);
+                shoppingCartList.add(newSoppingCart);
+                product.setQuantity(product.getQuantity() - newCartQuantity);
+            } else {
+                throw new OverDemandQuantity("Demanded Quantity is not available");
+            }
+        }
         orderRepository.save(order);
+    }
+
+    public double getOrderAmount(List<ShoppingCart> cartItems) {
+        double amount = 0;
+        for (ShoppingCart shoppingCart:cartItems) {
+            amount+= shoppingCart.getAmount();
+        }
+        return amount;
     }
 }

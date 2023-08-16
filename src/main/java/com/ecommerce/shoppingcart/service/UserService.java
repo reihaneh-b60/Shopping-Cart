@@ -1,10 +1,11 @@
 package com.ecommerce.shoppingcart.service;
 
 import com.ecommerce.shoppingcart.exception.UserExistException;
-import com.ecommerce.shoppingcart.model.User;
-import com.ecommerce.shoppingcart.Dao.UserBody;
+import com.ecommerce.shoppingcart.model.Users;
+import com.ecommerce.shoppingcart.dto.UserBody;
 import com.ecommerce.shoppingcart.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,13 +23,13 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    public User saveUser(User user) {
-        return userRepository.save(user);
+    public Users saveUser(Users users) {
+        return userRepository.save(users);
     }
 
-    public Long isUserPeresent(User user) {
-        User user1 = userRepository.findByEmailandName(user.getEmail(),user.getName());
-        return user1!=null ? user1.getId() : null;
+    public Long isUserPeresent(Users users) {
+        Users users1 = userRepository.findByEmailandName(users.getEmail(), users.getName());
+        return users1 !=null ? users1.getId() : null;
     }
 
     /**
@@ -36,27 +37,30 @@ public class UserService {
      * @param userBody The registration information.
      * @throws UserExistException Thrown if there is already a user with the given information.
      */
-    public void registerUser(UserBody userBody) throws UserExistException {
+    public Users registerUser(UserBody userBody) throws UserExistException {
 
       if (userRepository.findByEmailIgnoreCase(userBody.getEmail()).isPresent()) {
           throw new UserExistException();
       }
-        User user = new User();
-        user.setName(userBody.getName());
-        user.setEmail(userBody.getEmail());
+        Users users = new Users();
+        users.setName(userBody.getName());
+        users.setEmail(userBody.getEmail());
         if (!userBody.getPassword().isEmpty())
-            user.setPassword(new BCryptPasswordEncoder().encode(userBody.getPassword()));
-        userRepository.save(user);
+            users.setPassword(new BCryptPasswordEncoder().encode(userBody.getPassword()));
+        return userRepository.save(users);
     }
 
     /**
      * @return The list of users.
      */
-    public List<User> getAllUsers() {
+    public List<Users> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public User findById(Long id) {
+    public Users findById(Long id) {
+        userRepository.findById(id)
+                .orElseThrow(()->new UsernameNotFoundException("That user doesn't exist"));
+
         return userRepository.findById(id).get();
     }
 
@@ -66,17 +70,21 @@ public class UserService {
      * @param id The userId that search for updating
      * @return The new information of updated user
      */
-    public User updateUser(UserBody userBody,Long id) {
-        User user = userRepository.findById(id).get();
+    public Users updateUser(UserBody userBody, Long id) {
+        Users users = userRepository.findById(id)
+                .orElseThrow(()->new UsernameNotFoundException("That user doesn't exist"));
         if (userBody.getName() != null)
-            user.setName(userBody.getName());
+            users.setName(userBody.getName());
         if (userBody.getEmail()!= null)
-            user.setEmail(userBody.getEmail());
-        if (userBody.getPassword() != null)
-            if (!userBody.getPassword().isEmpty())
-                user.setPassword(new BCryptPasswordEncoder().encode(userBody.getPassword()));
-        return userRepository.save(user);
-
+            users.setEmail(userBody.getEmail());
+        if (userBody.getPassword() != null && !userBody.getPassword().isEmpty())
+                users.setPassword(new BCryptPasswordEncoder().encode(userBody.getPassword()));
+        return userRepository.save(users);
     }
 
+    public void deleteUserById(Long id) {
+        userRepository.findById(id)
+                .orElseThrow(()->new UsernameNotFoundException("That user doesn't exist"));
+        userRepository.deleteById(id);
+    }
 }
