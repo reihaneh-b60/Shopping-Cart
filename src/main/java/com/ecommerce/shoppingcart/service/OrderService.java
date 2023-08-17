@@ -120,9 +120,9 @@ public class OrderService {
                 differQuantity = newCartQuantity - cart.getQuantity();
                 if (differQuantity < product.getQuantity()) {
                     productQuantity = product.getQuantity()- (differQuantity);
-                } else {
+                } else
                     throw new OverDemandQuantityException("Demanded Quantity is not available");
-                }
+
                 cart.setQuantity(newCartQuantity);
                 cart.setAmount(product.getPrice() * newCartQuantity);
                 product.setQuantity(productQuantity);
@@ -131,10 +131,13 @@ public class OrderService {
             }
         }
 
-        ShoppingCart newShoppingCart = new ShoppingCart(myProductId, product.getName()
-                , newCartQuantity, product.getPrice() * newCartQuantity);
-        shoppingCartList.add(newShoppingCart);
-        product.setQuantity(product.getQuantity() - newCartQuantity);
+        if ( newCartQuantity < product.getQuantity()) {
+            ShoppingCart newShoppingCart = new ShoppingCart(myProductId, product.getName()
+                    , newCartQuantity, product.getPrice() * newCartQuantity);
+            shoppingCartList.add(newShoppingCart);
+            product.setQuantity(product.getQuantity() - newCartQuantity);
+        } else
+            throw new OverDemandQuantityException("Demanded Quantity is not available");
 
         orderRepository.save(order);
     }
