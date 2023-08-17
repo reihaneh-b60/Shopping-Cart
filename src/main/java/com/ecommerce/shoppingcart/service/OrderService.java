@@ -113,32 +113,30 @@ public class OrderService {
         Product product = productRepository.findById(myProductId).get();
         int productQuantity;
         int differQuantity;
+        final int[] catQuantity = new int[1];
 
-        for (ShoppingCart cart:shoppingCartList) {
-            Long productId = cart.getProductId();
-            if (productId.equals(myProductId)) {
-                differQuantity = newCartQuantity - cart.getQuantity();
-                if (differQuantity < product.getQuantity()) {
-                    productQuantity = product.getQuantity()- (differQuantity);
-                } else
-                    throw new OverDemandQuantityException("Demanded Quantity is not available");
-
-                cart.setQuantity(newCartQuantity);
-                cart.setAmount(product.getPrice() * newCartQuantity);
-                product.setQuantity(productQuantity);
-                orderRepository.save(order);
-                return;
+        shoppingCartList.stream()
+            .forEach(cart -> {
+                if (myProductId.equals(cart.getProductId())) {
+                    catQuantity[0] = cart.getQuantity();
+                    cart.setQuantity(newCartQuantity);
+                    cart.setAmount(product.getPrice() * newCartQuantity);
+                }
             }
-        }
+        );
 
-        if ( newCartQuantity < product.getQuantity()) {
-            ShoppingCart newShoppingCart = new ShoppingCart(myProductId, product.getName()
-                    , newCartQuantity, product.getPrice() * newCartQuantity);
-            shoppingCartList.add(newShoppingCart);
-            product.setQuantity(product.getQuantity() - newCartQuantity);
+        differQuantity = newCartQuantity - catQuantity[0];
+        if (differQuantity < product.getQuantity()) {
+            productQuantity = product.getQuantity()- (differQuantity);
         } else
             throw new OverDemandQuantityException("Demanded Quantity is not available");
 
+        if (catQuantity[0] <= 0) {
+            ShoppingCart newShoppingCart = new ShoppingCart(myProductId, product.getName()
+                    , newCartQuantity, product.getPrice() * newCartQuantity);
+            shoppingCartList.add(newShoppingCart);
+        }
+        product.setQuantity(productQuantity);
         orderRepository.save(order);
     }
 
